@@ -220,3 +220,24 @@ func DeleteEmployee(c *gin.Context) {
 		return
 	}
 }
+
+func GetAllEmployees(c *gin.Context) {
+	var employees []Employees
+
+	_, err := dbConnect.NewSelect().Model(&employees).Order("first_name ASC").Limit(999).ScanAndCount(c)
+	if err != nil {
+		log.Printf("Error while getting all employees, Reason: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": "Something went wrong",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":  http.StatusOK,
+		"message": "All Employees",
+		"count":   len(employees),
+		"data":    employees,
+	})
+	return
+}

@@ -3,7 +3,6 @@ module github.com/alexdang1993374/employee-api
 go 1.17
 
 require (
-	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.7.4
 	github.com/google/uuid v1.3.0
 	github.com/uptrace/bun v1.0.14
