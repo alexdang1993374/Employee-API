@@ -19,7 +19,8 @@ func InitiateDB(db *bun.DB) {
 
 type Employees struct {
 	ID          string    `json:"id"`
-	Name        string    `json:"name"`
+	FirstName   string    `json:"first_name"`
+	LastName    string    `json:"last_name"`
 	Age         int       `json:"age"`
 	Address     string    `json:"address"`
 	Gender      string    `json:"gender"`
@@ -29,15 +30,17 @@ type Employees struct {
 	UpdatedAt   time.Time `bun:",nullzero,notnull,default:current_timestamp"`
 }
 
-func CreateEmployeeTable(ctx context.Context) string {
+func CreateEmployeeTable(ctx context.Context) error {
 	_, err := dbConnect.NewCreateTable().
 		Model((*Employees)(nil)).
 		IfNotExists().
 		Exec(ctx)
 	if err != nil {
-		return err.Error()
+		log.Printf("Error while creating login table, Reason: %v\n", err)
+		return err
 	} else {
-		return "Table Created"
+		log.Printf("Login table created")
+		return nil
 	}
 }
 
@@ -46,17 +49,10 @@ func CreateEmployee(c *gin.Context) {
 
 	c.BindJSON(&employee)
 
-	// id := guuid.New().String()
-	// name := employee.Name
-	// age := employee.Age
-	// address := employee.Address
-	// gender := employee.Gender
-	// department := employee.Department
-	// phone_number := employee.PhoneNumber
-
 	employee = Employees{
 		ID:          guuid.New().String(),
-		Name:        employee.Name,
+		FirstName:   employee.FirstName,
+		LastName:    employee.LastName,
 		Age:         employee.Age,
 		Address:     employee.Address,
 		Gender:      employee.Gender,
