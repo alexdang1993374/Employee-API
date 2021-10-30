@@ -1,8 +1,10 @@
 package config
 
 import (
+	"context"
 	"database/sql"
 
+	"github.com/alexdang1993374/employee-api/controllers"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
@@ -20,6 +22,8 @@ func Connect() *bun.DB {
 		),
 	)
 	db := bun.NewDB(pgconn, pgdialect.New())
-
+	ctx := context.Background()
+	controllers.InitiateDB(db)
+	controllers.CreateEmployeeTable(ctx)
 	return db
 }
