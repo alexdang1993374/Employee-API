@@ -184,3 +184,39 @@ func UpdateEmployee(c *gin.Context) {
 		return
 	}
 }
+
+func DeleteEmployee(c *gin.Context) {
+	employeeID := c.Param("employeeId")
+
+	oldEmployee := Employees{}
+
+	err := dbConnect.NewSelect().Model((*Employees)(nil)).Where("id = ?", employeeID).Scan(c, &oldEmployee)
+	if err != nil {
+		log.Printf("Error while getting an employee, Reason: %v\n", err)
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  http.StatusNotFound,
+			"message": "Employee not found",
+		})
+		return
+	}
+
+	_, deleteError := dbConnect.NewDelete().
+		Model((*Employees)(nil)).
+		Where("id = ?", employeeID).
+		Exec(c)
+
+	if deleteError != nil {
+		log.Printf("Error while deleting a single employee, Reason: %v\n", deleteError)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": "Something went wrong",
+		})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  http.StatusOK,
+			"message": "Employee deleted successfully",
+		})
+		return
+	}
+}

@@ -8,4 +8,5 @@ import (
 func Routes(router *gin.Engine) {
 	router.POST("/employees", controllers.CreateEmployee)
 	router.PUT("/employees/:employeeId", controllers.UpdateEmployee)
+	router.DELETE("/employees/:employeeId", controllers.DeleteEmployee)
 }
