@@ -72,6 +72,114 @@ func CreateEmployee(c *gin.Context) {
 		c.JSON(http.StatusCreated, gin.H{
 			"status":  http.StatusCreated,
 			"message": "Employee created Successfully",
+			"data":    employee,
+		})
+		return
+	}
+}
+
+func UpdateEmployee(c *gin.Context) {
+	employeeID := c.Param("employeeId")
+	newEmployee := Employees{}
+	oldEmployee := Employees{}
+
+	err := dbConnect.NewSelect().Model((*Employees)(nil)).Where("id = ?", employeeID).Scan(c, &oldEmployee)
+	if err != nil {
+		log.Printf("Error while getting an employee, Reason: %v\n", err)
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  http.StatusNotFound,
+			"message": "Employee not found",
+		})
+		return
+	}
+
+	c.BindJSON(&newEmployee)
+
+	var firstName string
+	var lastName string
+	var age int
+	var address string
+	var gender string
+	var department string
+	var phoneNumber string
+
+	if newEmployee.FirstName != "" {
+		firstName = newEmployee.FirstName
+	} else {
+		firstName = oldEmployee.FirstName
+	}
+
+	if newEmployee.LastName != "" {
+		lastName = newEmployee.LastName
+	} else {
+		lastName = oldEmployee.LastName
+	}
+
+	if newEmployee.Age != 0 {
+		age = newEmployee.Age
+	} else {
+		age = oldEmployee.Age
+	}
+
+	if newEmployee.Address != "" {
+		address = newEmployee.Address
+	} else {
+		address = oldEmployee.Address
+	}
+
+	if newEmployee.Gender != "" {
+		gender = newEmployee.Gender
+	} else {
+		gender = oldEmployee.Gender
+	}
+
+	if newEmployee.Department != "" {
+		department = newEmployee.Department
+	} else {
+		department = oldEmployee.Department
+	}
+
+	if newEmployee.PhoneNumber != "" {
+		phoneNumber = newEmployee.PhoneNumber
+	} else {
+		phoneNumber = oldEmployee.PhoneNumber
+	}
+
+	newEmployee = Employees{
+		ID:          employeeID,
+		FirstName:   firstName,
+		LastName:    lastName,
+		Age:         age,
+		Address:     address,
+		Gender:      gender,
+		Department:  department,
+		PhoneNumber: phoneNumber,
+	}
+
+	_, updateError := dbConnect.NewUpdate().
+		Model(&newEmployee).
+		Column("first_name").
+		Column("last_name").
+		Column("age").
+		Column("address").
+		Column("gender").
+		Column("department").
+		Column("phone_number").
+		Where("id = ?", employeeID).
+		Exec(c)
+
+	if updateError != nil {
+		log.Printf("Error, Reason: %v\n", updateError)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  500,
+			"message": "Something went wrong",
+		})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  200,
+			"message": "Employee Edited Successfully",
+			"data":    &newEmployee,
 		})
 		return
 	}
