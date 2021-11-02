@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	github.com/gin-gonic/gin v1.7.4
-	github.com/google/uuid v1.3.0
 	github.com/uptrace/bun v1.0.14
 	github.com/uptrace/bun/dialect/pgdialect v1.0.14
 	github.com/uptrace/bun/driver/pgdriver v1.0.14
