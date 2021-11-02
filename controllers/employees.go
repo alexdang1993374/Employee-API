@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	guuid "github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
 
@@ -18,7 +17,7 @@ func InitiateDB(db *bun.DB) {
 }
 
 type Employees struct {
-	ID          string    `json:"id"`
+	ID          int       `json:"id"`
 	FirstName   string    `json:"first_name"`
 	LastName    string    `json:"last_name"`
 	Age         int       `json:"age"`
@@ -45,12 +44,13 @@ func CreateEmployeeTable(ctx context.Context) error {
 }
 
 func CreateEmployee(c *gin.Context) {
+
 	employee := Employees{}
 
 	c.BindJSON(&employee)
 
 	employee = Employees{
-		ID:          guuid.New().String(),
+		ID:          employee.ID,
 		FirstName:   employee.FirstName,
 		LastName:    employee.LastName,
 		Age:         employee.Age,
@@ -58,6 +58,19 @@ func CreateEmployee(c *gin.Context) {
 		Gender:      employee.Gender,
 		Department:  employee.Department,
 		PhoneNumber: employee.PhoneNumber,
+	}
+
+	exists, findErr := dbConnect.NewSelect().Model((*Employees)(nil)).Where("id = ?", employee.ID).Exists(c)
+	if findErr != nil {
+		panic(findErr)
+	}
+	if exists {
+		log.Printf("Error while inserting new employee into db, Reason: Employee already exists")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": "Error while inserting new employee into db, Reason: Employee already exists",
+		})
+		return
 	}
 
 	_, err := dbConnect.NewInsert().Model(&employee).Exec(c)
@@ -95,6 +108,7 @@ func UpdateEmployee(c *gin.Context) {
 
 	c.BindJSON(&newEmployee)
 
+	id := oldEmployee.ID
 	var firstName string
 	var lastName string
 	var age int
@@ -146,7 +160,7 @@ func UpdateEmployee(c *gin.Context) {
 	}
 
 	newEmployee = Employees{
-		ID:          employeeID,
+		ID:          id,
 		FirstName:   firstName,
 		LastName:    lastName,
 		Age:         age,
